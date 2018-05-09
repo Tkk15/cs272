@@ -187,8 +187,30 @@ public class Controller {
 		ObservableList<VideoGame> userGamesList = FXCollections.observableArrayList();
 		//TODO: Implement this method
 		// 1) With the user_games table (mUserGamesDB), get the records that match the current user's (mCurrentUser) id
+		try
+        {
+            ArrayList<ArrayList<String>> resultsList = theOne.mUserGamesDB.getRecord(String.valueOf(theOne.mCurrentUser.getId()));
+        int gameId;
+        //Loop through results
+        for(ArrayList<String> values: resultsList)
+        {
+         gameId=Integer.parseInt(values.get(1));
+         //Loop through all the games
+//mAllGamesList.forEach(e -> e.getId() == gameId);
+         for(VideoGame e: mAllGamesList)
+             if(e.getId()==gameId)
+                 {userGamesList.add(e);
+                 break;}
+        }
+        }
+        catch (SQLException e)
+        {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+        }
 		// Note: the records returned will only contain the user_id and game_id (both ints)
 		// Loop through the all games list (mAllGamesList).  If any game in the list matches the game id, then:
+
 		// 2) Add the matching game to the user games list
 		// 3) Return the user games list.
 		return userGamesList;
@@ -197,11 +219,26 @@ public class Controller {
 	public boolean addGameToUsersInventory(VideoGame selectedGame)  {
 		//TODO: Implement this method
 		// 1) Create an ObservableList<VideoGame> assigned to the list returned from getGamesForCurrentUser
+	    ObservableList<VideoGame> gamesOwnedByUser = getGamesForCurrentUser();
 		// If this list contains the selected game, return false (game has already been added, so prevent duplicates)
+	    if(gamesOwnedByUser.contains(selectedGame))
+	        return false;
 		// 2) Create a String array of the values to insert into the user_games (mUserGamesDB) table.
 		// There are only two values in this table: the user's id (mCurrentUser) and the selected game id
-		// 3) Create a new record using the USER_GAMES_FIELD_NAMES and the values array
-		// If a SQLException occurs, return false (could not be added)
+        String[] values = { String.valueOf(theOne.mCurrentUser.getId()), String.valueOf(selectedGame.getId())  };
+   // 3) Create a new record using the USER_GAMES_FIELD_NAMES and the values array
+        //If a SQLException occurs, return false (could not be added)
+	try
+    {
+        theOne.mUserGamesDB.createRecord(USER_GAMES_FIELD_NAMES, values);
+    }
+    catch (SQLException e)
+    {
+        e.printStackTrace(); 
+        return false;
+    }
+
+     
 		// Otherwise, return true.
 		return true;
 	}
